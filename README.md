@@ -33,4 +33,4 @@
 ###### end procedure
 ### Copying the file
 #### Step 8 is copying the file out of the VDI disk image and onto the host system.
-#### Your program should get the names of the VDI file, the file in the virtual disk and the destination file. Openthedestinationfilelikeanormalfile—usetheopen()systemcallwithO_WRONLY|O_CREAT parameters and mode 0666 — and loop through all of the blocks in the file on the virtual disk and copy the data into the destination file.
+#### Your program should get the names of the VDI file, the file in the virtual disk and the destination file. Open the destination file like a normal file — use the open() system call with O_WRONLY|O_CREAT parameters and mode 0666 — and loop through all of the blocks in the file on the virtual disk and copy the data into the destination file.
