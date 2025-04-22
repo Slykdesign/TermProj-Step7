@@ -1,3 +1,38 @@
+#include "partition.h"
+#include "ext2.h"
+#include "directory.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <ctype.h>
+
+// Function prototypes
+void displayBufferPage(uint8_t *buf, uint32_t count, uint32_t skip, uint64_t offset);
+void displayBuffer(uint8_t *buf, uint32_t count, uint64_t offset);
+
+int main() {
+    Ext2File *ext2 = openExt2File("./good-fixed-1k.vdi");
+    if (!ext2) return 1;
+
+    printf("Root directory contents\n");
+    struct Directory *d = openDir(ext2, 2); // Open root directory
+    uint32_t iNum;
+    char name[256];
+    while (getNextDirect(d, &iNum, name)) {
+        printf("Inode: %u   name: [%s]\n", iNum, name);
+    }
+    closeDir(d);
+
+    printf("\nlost+found directory contents\n");
+    d = openDir(ext2, 11); // Open lost+found directory
+    while (getNextDirect(d, &iNum, name)) {
+        printf("Inode: %u   name: [%s]\n", iNum, name);
+    }
+    closeDir(d);
+    return 0;
+}
+
 void displayBufferPage(uint8_t *buf, uint32_t count, uint32_t skip, uint64_t offset) {
     count = (count > 256) ? 256 : count;  // Limit to 256 bytes
     printf("Offset: 0x%lx\n", offset);
