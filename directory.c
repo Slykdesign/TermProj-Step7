@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Directory *openDir(Ext2File *f, uint32_t iNum) {
+struct Directory *openDir(struct Ext2File *f, uint32_t iNum) {
     struct Directory *d = malloc(sizeof(struct Directory));
     if (!d) return NULL;
 
@@ -54,7 +54,7 @@ void closeDir(struct Directory *d) {
     }
 }
 
-uint32_t searchDir(Ext2File *f, uint32_t iNum, char *target) {
+uint32_t searchDir(struct Ext2File *f, uint32_t iNum, char *target) {
     struct Directory *dir = openDir(f, iNum);
     if (!dir) return 0;
 
@@ -70,7 +70,7 @@ uint32_t searchDir(Ext2File *f, uint32_t iNum, char *target) {
     return 0;
 }
 
-uint32_t traversePath(Ext2File *f, char *path) {
+uint32_t traversePath(struct Ext2File *f, char *path) {
     uint32_t iNum = 2; // Start at root inode (2)
     size_t start = 1, len = strlen(path);
 

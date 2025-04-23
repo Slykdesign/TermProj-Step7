@@ -3,6 +3,6 @@
 
 #include "ext2.h"
 
-void copyFile(Ext2File *f, char *srcPath, char *destPath);
+void copyFile(struct Ext2File *f, char *srcPath, char *destPath);
 
 #endif

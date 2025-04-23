@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-void copyFile(Ext2File *f, char *srcPath, char *destPath) {
+void copyFile(struct Ext2File *f, char *srcPath, char *destPath) {
     uint32_t iNum = traversePath(f, srcPath);
     if (iNum == 0) {
         fprintf(stderr, "File not found: %s\n", srcPath);
