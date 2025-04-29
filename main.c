@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <fcntl.h>
 #include <ctype.h>
 
 // Function prototypes
@@ -12,7 +11,7 @@ void displayBufferPage(uint8_t *buf, uint32_t count, uint32_t skip, uint64_t off
 void displayBuffer(uint8_t *buf, uint32_t count, uint64_t offset);
 
 int main() {
-    struct Ext2File *ext2 = openExt2("./good-fixed-1k.vdi");
+    struct Ext2File *ext2 = openExt2("full/path/to/file");
     if (!ext2) return 1;
 
     printf("Root directory contents\n");

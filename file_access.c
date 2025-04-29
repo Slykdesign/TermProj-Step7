@@ -1,17 +1,16 @@
 #include "file_access.h"
 #include "ext2.h"
 #include "inode.h"
-#include <stdlib.h>
 
 #define BLOCK_SIZE 1024 // Assuming a block size of 1024 bytes
 
-int32_t fetchBlockFromFile(struct Ext2File *f, Inode *i, uint32_t bNum, void *buf) {
+int32_t fetchBlockFromFile(struct Ext2File *f, struct Inode *i, uint32_t bNum, void *buf) {
     uint32_t blockNum;
     if (bNum < 12) {
         // Direct block
         blockNum = i->i_block[bNum];
     } else {
-        uint32_t k = f->block_size / 4;
+        uint32_t k = f->blockSize / 4;
         if (bNum < 12 + k) {
             // Single indirect block
             if (i->i_block[12] == 0) return -1;
@@ -41,13 +40,13 @@ int32_t fetchBlockFromFile(struct Ext2File *f, Inode *i, uint32_t bNum, void *bu
     return fetchBlock(f, blockNum, buf) ? 0 : -1;
 }
 
-int32_t writeBlockToFile(struct Ext2File *f, Inode *i, uint32_t bNum, void *buf) {
+int32_t writeBlockToFile(struct Ext2File *f, struct Inode *i, uint32_t bNum, void *buf) {
     uint32_t blockNum;
     if (bNum < 12) {
         // Direct block
         blockNum = i->i_block[bNum];
     } else {
-        uint32_t k = f->block_size / 4;
+        uint32_t k = f->blockSize / 4;
         if (bNum < 12 + k) {
             // Single indirect block
             if (i->i_block[12] == 0) return -1;

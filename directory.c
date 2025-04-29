@@ -13,7 +13,7 @@ struct Directory *openDir(struct Ext2File *f, uint32_t iNum) {
 
     d->file = f;
     d->cursor = 0;
-    d->blockBuffer = malloc(f->block_size);
+    d->blockBuffer = malloc(f->blockSize);
     if (!d->blockBuffer) {
         free(d);
         return NULL;
@@ -23,8 +23,8 @@ struct Directory *openDir(struct Ext2File *f, uint32_t iNum) {
 
 bool getNextDirect(struct Directory *d, uint32_t *iNum, char *name) {
     while (d->cursor < d->inode.i_size) {
-        uint32_t blockIndex = d->cursor / d->file->block_size;
-        uint32_t offset = d->cursor % d->file->block_size;
+        uint32_t blockIndex = d->cursor / d->file->blockSize;
+        uint32_t offset = d->cursor % d->file->blockSize;
 
         if (offset == 0 && !fetchBlock(d->file, d->inode.i_block[blockIndex], d->blockBuffer)) {
             return false;

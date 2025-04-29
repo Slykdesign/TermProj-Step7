@@ -3,8 +3,7 @@
 
 #include "ext2.h"
 
-typedef struct {
-    // Fields for inode structure...
+struct Inode {
     uint16_t i_mode;
     uint16_t i_uid;
     uint32_t i_size;
@@ -21,14 +20,14 @@ typedef struct {
     uint32_t i_file_acl;
     uint32_t i_dir_acl;
     uint32_t i_faddr;
-} Inode;
+};
 
 // New function prototypes
-int32_t fetchInode(struct Ext2File *f, uint32_t iNum, Inode *buf);
-int32_t writeInode(struct Ext2File *f, uint32_t iNum, Inode *buf);
+int32_t fetchInode(struct Ext2File *f, uint32_t iNum, struct Inode *buf);
+int32_t writeInode(struct Ext2File *f, uint32_t iNum, struct Inode *buf);
 int32_t inodeInUse(struct Ext2File *f, uint32_t iNum);
 uint32_t allocateInode(struct Ext2File *f, int32_t group);
 int32_t freeInode(struct Ext2File *f, uint32_t iNum);
-void displayInode(Inode *inode);
+void displayInode(struct Inode *inode);
 
 #endif //INODE_H

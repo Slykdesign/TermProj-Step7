@@ -4,19 +4,18 @@
 #include "ext2.h"
 #include "inode.h"
 
-#define MAX_NAME_LEN 255
+#define MAX_NAME_LEN 256
 
 struct Direct {
     uint32_t iNum;        // Inode number
     uint16_t recLen;      // Length of this record
-    uint8_t nameLen;      // Length of the name
-    char name[MAX_NAME_LEN]; // File name
+    uint8_t nameLen, fileType, name[1];      // Length of the name
 };
 
 // Definition of struct Directory
 struct Directory {
     struct Ext2File *file;       // Pointer to the file structure
-    Inode inode;   // Inode structure for the directory
+    struct Inode inode;   // Inode structure for the directory
     uint32_t cursor;      // Current position in the directory
     void *blockBuffer;    // Buffer for reading directory blocks
 };

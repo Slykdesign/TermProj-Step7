@@ -1,11 +1,9 @@
 #include "ext2.h"
 #include "inode.h"
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
-int32_t fetchInode(struct Ext2File *f, uint32_t iNum, Inode *buf) {
+int32_t fetchInode(struct Ext2File *f, uint32_t iNum, struct Inode *buf) {
     if (iNum == 0 || iNum > f->superblock.s_inodes_count) {
         return -1; // Invalid inode number
     }
@@ -13,18 +11,18 @@ int32_t fetchInode(struct Ext2File *f, uint32_t iNum, Inode *buf) {
 
     uint32_t group = iNum / f->superblock.s_inodes_per_group;
     uint32_t index = iNum % f->superblock.s_inodes_per_group;
-    uint32_t block = f->bgdt[group].bg_inode_table + (index * f->superblock.s_inode_size) / f->block_size;
-    uint32_t offset = (index * f->superblock.s_inode_size) % f->block_size;
+    uint32_t block = f->bgdt[group].bg_inode_table + (index * f->superblock.s_inode_size) / f->blockSize;
+    uint32_t offset = (index * f->superblock.s_inode_size) % f->blockSize;
 
-    uint8_t block_buf[f->block_size];
+    uint8_t block_buf[f->blockSize];
     if (!fetchBlock(f, block, block_buf)) {
         return -1; // Error reading block
     }
-    memcpy(buf, block_buf + offset, sizeof(Inode));
+    memcpy(buf, block_buf + offset, sizeof(struct Inode));
     return 0; // Success
 }
 
-int32_t writeInode(struct Ext2File *f, uint32_t iNum, Inode *buf) {
+int32_t writeInode(struct Ext2File *f, uint32_t iNum, struct Inode *buf) {
     if (iNum == 0 || iNum > f->superblock.s_inodes_count) {
         return -1; // Invalid inode number
     }
@@ -32,14 +30,14 @@ int32_t writeInode(struct Ext2File *f, uint32_t iNum, Inode *buf) {
 
     uint32_t group = iNum / f->superblock.s_inodes_per_group;
     uint32_t index = iNum % f->superblock.s_inodes_per_group;
-    uint32_t block = f->bgdt[group].bg_inode_table + (index * f->superblock.s_inode_size) / f->block_size;
-    uint32_t offset = (index * f->superblock.s_inode_size) % f->block_size;
+    uint32_t block = f->bgdt[group].bg_inode_table + (index * f->superblock.s_inode_size) / f->blockSize;
+    uint32_t offset = (index * f->superblock.s_inode_size) % f->blockSize;
 
-    uint8_t block_buf[f->block_size];
+    uint8_t block_buf[f->blockSize];
     if (!fetchBlock(f, block, block_buf)) {
         return -1; // Error reading block
     }
-    memcpy(block_buf + offset, buf, sizeof(Inode));
+    memcpy(block_buf + offset, buf, sizeof(struct Inode));
     if (!writeBlock(f, block, block_buf)) {
         return -1; // Error writing block
     }
@@ -54,10 +52,10 @@ int32_t inodeInUse(struct Ext2File *f, uint32_t iNum) {
 
     uint32_t group = iNum / f->superblock.s_inodes_per_group;
     uint32_t index = iNum % f->superblock.s_inodes_per_group;
-    uint32_t block = f->bgdt[group].bg_inode_bitmap + (index / (8 * f->block_size));
-    uint32_t offset = index % (8 * f->block_size);
+    uint32_t block = f->bgdt[group].bg_inode_bitmap + (index / (8 * f->blockSize));
+    uint32_t offset = index % (8 * f->blockSize);
 
-    uint8_t block_buf[f->block_size];
+    uint8_t block_buf[f->blockSize];
     if (!fetchBlock(f, block, block_buf)) {
         return -1; // Error reading block
     }
@@ -65,12 +63,12 @@ int32_t inodeInUse(struct Ext2File *f, uint32_t iNum) {
 }
 
 uint32_t allocateInode(struct Ext2File *f, int32_t group) {
-    for (uint32_t g = (group == -1 ? 0 : group); g < f->num_block_groups; g++) {
-        uint8_t block_buf[f->block_size];
+    for (uint32_t g = (group == -1 ? 0 : group); g < f->numBlockGroups; g++) {
+        uint8_t block_buf[f->blockSize];
         if (!fetchBlock(f, f->bgdt[g].bg_inode_bitmap, block_buf)) {
             return 0; // Error reading block
         }
-        for (uint32_t i = 0; i < f->block_size * 8; i++) {
+        for (uint32_t i = 0; i < f->blockSize * 8; i++) {
             if ((block_buf[i / 8] & (1 << (i % 8))) == 0) {
                 block_buf[i / 8] |= (1 << (i % 8));
                 if (!writeBlock(f, f->bgdt[g].bg_inode_bitmap, block_buf)) {
@@ -94,10 +92,10 @@ int32_t freeInode(struct Ext2File *f, uint32_t iNum) {
 
     uint32_t group = iNum / f->superblock.s_inodes_per_group;
     uint32_t index = iNum % f->superblock.s_inodes_per_group;
-    uint32_t block = f->bgdt[group].bg_inode_bitmap + (index / (8 * f->block_size));
-    uint32_t offset = index % (8 * f->block_size);
+    uint32_t block = f->bgdt[group].bg_inode_bitmap + (index / (8 * f->blockSize));
+    uint32_t offset = index % (8 * f->blockSize);
 
-    uint8_t block_buf[f->block_size];
+    uint8_t block_buf[f->blockSize];
     if (!fetchBlock(f, block, block_buf)) {
         return -1; // Error reading block
     }
@@ -108,7 +106,7 @@ int32_t freeInode(struct Ext2File *f, uint32_t iNum) {
     return 0; // Success
 }
 
-void displayInode(Inode *inode) {
+void displayInode(struct Inode *inode) {
     printf("Inode:\n");
     printf("  Mode: %u\n", inode->i_mode);
     printf("  User ID: %u\n", inode->i_uid);

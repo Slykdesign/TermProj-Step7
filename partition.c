@@ -4,7 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 
-MBRPartition* openPartition(const char *filename, int part) {
+#define SECTOR_SIZE 512
+
+MBRPartition *openPartition(char *filename, int part) {
     MBRPartition *partition = malloc(sizeof(MBRPartition));
     if (!partition) return NULL;
 
@@ -77,18 +79,21 @@ ssize_t writePartition(MBRPartition *partition, void *buf, size_t count) {
 }
 
 off_t vdiSeekPartition(MBRPartition *partition, off_t offset, int anchor) {
-    off_t newCursor;
+    off_t newCursor = 0;
+
     if (anchor == SEEK_SET) {
         newCursor = offset;
     } else if (anchor == SEEK_CUR) {
         newCursor = partition->cursor + offset;
     } else if (anchor == SEEK_END) {
-        newCursor = partition->sectorCount * 512 + offset;
+        newCursor = partition->sectorCount * SECTOR_SIZE + offset;
     } else {
         return -1;
     }
 
-    if (newCursor < 0 || newCursor > partition->sectorCount * 512) return -1;
+    if (newCursor < 0 || newCursor > (off_t)(partition->sectorCount * SECTOR_SIZE)) {
+        return -1;
+    }
 
     partition->cursor = newCursor;
     return partition->cursor;
